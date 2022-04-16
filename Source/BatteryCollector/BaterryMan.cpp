@@ -37,6 +37,8 @@ ABaterryMan::ABaterryMan()
 void ABaterryMan::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABaterryMan::OnBeginOverlap);
 	
 }
 
@@ -80,5 +82,20 @@ void ABaterryMan::MoveRight(float Axis)
 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		AddMovementInput(Direction, Axis);
+	}
+}
+
+void ABaterryMan::OnBeginOverlap(UPrimitiveComponent* HitComp,
+	AActor* OtherActor, UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex,
+	bool bFromSweep, const FHitResult& SweetResult)
+{
+	if (OtherActor->ActorHasTag("Recharge")) {
+		
+		Power += 10.0f;
+
+		if (Power > 100.0f) {
+			Power = 100.0f;
+		}
+		OtherActor->Destroy();
 	}
 }
