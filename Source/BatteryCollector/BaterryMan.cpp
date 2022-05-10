@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ // Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "BaterryMan.h"
@@ -31,6 +31,7 @@ ABaterryMan::ABaterryMan()
 	FollowCamera->bUsePawnControlRotation = false;
 
 	bDead = false;
+	Power = 100.0f;
 }
 
 // Called when the game starts or when spawned
@@ -39,6 +40,11 @@ void ABaterryMan::BeginPlay()
 	Super::BeginPlay();
 
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ABaterryMan::OnBeginOverlap);
+
+	if (Player_Power_Widget_Class != nullptr) {
+		Player_Power_Widget = CreateWidget(GetWorld(), Player_Power_Widget_Class);
+		Player_Power_Widget->AddToViewport();
+	}
 	
 }
 
@@ -47,6 +53,8 @@ void ABaterryMan::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	Power -= DeltaTime * PowerThreshold;
+	 
 }
 
 // Called to bind functionality to input
@@ -94,7 +102,7 @@ void ABaterryMan::OnBeginOverlap(UPrimitiveComponent* HitComp,
 		Power += 10.0f;
 
 		if (Power > 100.0f) {
-			Power = 100.0f;
+			Power = 100.0f; 
 		}
 		OtherActor->Destroy();
 	}
