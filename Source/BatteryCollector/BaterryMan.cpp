@@ -2,6 +2,9 @@
 
 
 #include "BaterryMan.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "GameFramework/Actor.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ABaterryMan::ABaterryMan()
@@ -45,7 +48,6 @@ void ABaterryMan::BeginPlay()
 		Player_Power_Widget = CreateWidget(GetWorld(), Player_Power_Widget_Class);
 		Player_Power_Widget->AddToViewport();
 	}
-	
 }
 
 // Called every frame
@@ -54,7 +56,17 @@ void ABaterryMan::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	Power -= DeltaTime * PowerThreshold;
-	 
+
+	if (Power <= 0) {
+		if (!bDead) {
+			bDead = true;
+
+			GetMesh()->SetSimulatePhysics(true);
+
+			FTimerHandle UnusedHandle;
+			GetWorldTimerManager().SetTimer(UnusedHandle, this, &ABaterryMan::RestartGame, 3.0f, false);
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -91,6 +103,11 @@ void ABaterryMan::MoveRight(float Axis)
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		AddMovementInput(Direction, Axis);
 	}
+}
+
+void ABaterryMan::RestartGame()
+{
+	UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
 }
 
 void ABaterryMan::OnBeginOverlap(UPrimitiveComponent* HitComp,
